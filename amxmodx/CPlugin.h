@@ -131,6 +131,7 @@ public:
 
 	CPlugin* loadPlugin(const char* path, const char* name, char* error, size_t maxLength, int debug);
 	void unloadPlugin(CPlugin** a);
+	void unloadPlugin(CPlugin* a);
 	int loadPluginsFromFile(const char* filename, bool warn=true);
 	
 	inline CPlugin* findPluginFast(AMX *amx) { return (CPlugin*)(amx->userdata[UD_FINDPLUGIN]); }
