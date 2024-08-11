@@ -4740,7 +4740,7 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 		return false;
 	}
 	
-	AMX *plugin = g_plugins.findPlugin((int)params[arg_plugin]);		// получили amx поинтер плагина
+	AMX *plugin = g_plugins.findPlugin((int)params[arg_id]);		// получили amx поинтер плагина
 
 	if (amx == plugin)	// мы не можем перезагрузить этот же плагин. Есть специальная функция для этого
 	{
