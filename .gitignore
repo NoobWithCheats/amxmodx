@@ -84,7 +84,6 @@ Thumbs.db
 # AMXX plugin build related files
 plugins/compile.dat
 plugins/compiled/
-*.amx
-*.amxx
+
 
 build_deps/
