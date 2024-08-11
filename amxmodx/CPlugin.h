@@ -84,6 +84,7 @@ public:
 		inline const char* getDescription() { return description.chars(); }
 		inline const char* getError() { return errorMsg.chars();}
 		inline int getStatusCode() { return status; }
+		inline void* getCode() { return &code; }
 		inline int getId() const { return id; }
 		inline AMX* getAMX() { return &amx; }
 		inline const AMX* getAMX() const { return &amx; }

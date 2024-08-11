@@ -4740,22 +4740,20 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 		return false;
 	}
 	
-	AMX *plugin = g_plugins.findPlugin((int)params[arg_id]);		// получили amx поинтер плагина
+	CPluginMngr::CPlugin *pPlugin = g_plugins.findPlugin((int)params[arg_id]);		// получили amx поинтер плагина
 
-	if (amx == plugin)	// мы не можем перезагрузить этот же плагин. Есть специальная функция для этого
+	if (amx == pPlugin->getAMX())	// мы не можем перезагрузить этот же плагин. Есть специальная функция для этого
 	{
 		// TOD: сделать так, чтоб мы просто вызывали другой натив для этого
 		return false;
 	}
-
-	CPluginMngr::CPlugin *pPlugin = g_plugins.findPluginFast(plugin);
 	
 	char pluginName[256];
 	strcpy(pluginName, pPlugin->getName());
 
 	// если program (2-й арг) 0, то мы не освободим память, выделянную под плагин. опасно ли это? обновится ли наш плагин после этого?
 
-	if (unload_amxscript(plugin, (*pPlugin)->code) != AMX_ERR_NONE); // выгрузка плаигна с Сервера
+	if (unload_amxscript(plugin, pPlugin->getCode()) != AMX_ERR_NONE); // выгрузка плаигна с Сервера
 	{
 		AMXXLOG_Error("[AMXX] Plugin \"%s\" could not be unloaded from memory", pluginName);
 		// ошибка, не удалось выгрузить код плагина с памяти, но самого плагина нет
@@ -4870,7 +4868,7 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 }
 
 
-bool SearchPluginInFile(const char* filename, connst char* name, int* debugFlag)
+bool SearchPluginInFile(const char* filename, const char* name, int* debugFlag)
 {
 	char file[PLATFORM_MAX_PATH];
 	FILE *fp = fopen(build_pathname_r(file, sizeof(file), "%s", filename), "rt");
