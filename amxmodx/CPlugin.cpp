@@ -124,12 +124,12 @@ bool CPluginMngr:: SearchPluginOtherFile(char* pluginName, int debugFlag)
 
 	while ( (ep=readdir(dp)) != NULL )
 	{
-		if (strncmp(fd.name, "plugins-", 8) == 0)
+		if (strncmp(ep->d_name, "plugins-", 8) == 0) 
 		{
-			size_t len = strlen(name);
-			if (strcmp(&name[len-4], ".ini") == 0)
+			size_t len = strlen(ep->d_name);
+			if (strcmp(ep->d_name[len-4], ".ini") == 0)
 			{
-				ke::AString *pString = new ke::AString(fd.name);
+				ke::AString *pString = new ke::AString(ep->d_name);
 				files.push(pString);
 			}
 		}
