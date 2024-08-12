@@ -96,6 +96,7 @@ bool CPluginMngr:: SearchPluginOtherFile(char* pluginName, int debugFlag)
 	build_pathname_r(path, sizeof(path), "%s/*.ini", configsDir);
 	_finddata_t fd;
 	intptr_t handle = _findfirst(path, &fd);
+	const char* name = 
 
 	if (handle < 0)
 	{
@@ -104,9 +105,10 @@ bool CPluginMngr:: SearchPluginOtherFile(char* pluginName, int debugFlag)
 
 	while (!_findnext(handle, &fd))
 	{
-		if (strncmp(fd.name, "plugins-", 8) == 0)
+		const char* name = fd.name;
+		if (strncmp(name, "plugins-", 8) == 0)
 		{
-			ke::AString *pString = new ke::AString(fd.name);
+			ke::AString *pString = new ke::AString(name);
 			files.push(pString);
 		}
 	}
@@ -124,12 +126,13 @@ bool CPluginMngr:: SearchPluginOtherFile(char* pluginName, int debugFlag)
 
 	while ( (ep=readdir(dp)) != NULL )
 	{
-		if (strncmp(ep->d_name, "plugins-", 8) == 0) 
+		const char* name = ep->d_name;
+		if (strncmp(name, "plugins-", 8) == 0) 
 		{
-			size_t len = strlen(ep->d_name);
-			if (strcmp(ep->d_name[len-4], ".ini") == 0)
+			size_t len = strlen(name);
+			if (strcmp(&name[len-4], ".ini") == 0)
 			{
-				ke::AString *pString = new ke::AString(ep->d_name);
+				ke::AString *pString = new ke::AString(name);
 				files.push(pString);
 			}
 		}
