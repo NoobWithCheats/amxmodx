@@ -83,6 +83,7 @@ public:
 		inline const char* getUrl() { return url.chars(); }
 		inline const char* getDescription() { return description.chars(); }
 		inline const char* getError() { return errorMsg.chars();}
+		inline char* getName() { return name.chars();}
 		inline int getStatusCode() { return status; }
 		inline void* getCode() { return &code; }
 		inline int getId() const { return id; }

@@ -4720,7 +4720,7 @@ static cell AMX_NATIVE_CALL RequestFrame(AMX *amx, cell *params)
 // 	// UnloadAmxScript(amx)
 // 	// 
 // }
-#include "engine_strucs.h"
+#include "modules.h"
 #include "CPlugin.h"
 /**
  * Перезагрузка плагина по id
@@ -4752,10 +4752,10 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 	
 	char pluginName[256]; // TODO: надо записать, но функция получает только при const char
 	void* code = pPlugin->getCode();
-	strcpy(pluginName, pPlugin->name.chars());
+	pluginName = pPlugin->getName();
 	// если program (2-й арг) 0, то мы не освободим память, выделянную под плагин. опасно ли это? обновится ли наш плагин после этого?
 
-	if (unload_amxscript(pAmx, code) != AMX_ERR_NONE); // TODO ссылка в ссылке. выгрузка плаигна с Сервера
+	if (unload_amxscript(pAmx, &code) != AMX_ERR_NONE); // TODO ссылка в ссылке. выгрузка плаигна с Сервера
 	{
 		AMXXLOG_Error("[AMXX] Plugin \"%s\" could not be unloaded from memory", pluginName);
 		// ошибка, не удалось выгрузить код плагина с памяти, но самого плагина нет
@@ -4802,9 +4802,8 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 	}
 
 	char error[256];
-	char *pluginsDir = get_localinfo("amxx_pluginsdir", "addons/amxmodx/plugins");
 
-	*pPlugin = loadPlugin(pluginsDir, pluginName, error, sizeof(error), debugFlag);
+	*pPlugin = loadPlugin(get_localinfo("amxx_pluginsdir", "addons/amxmodx/plugins"), pluginName, error, sizeof(error), debugFlag);
 		
 	// ссылка, ссылка (1 и 2 арг). Это уже надо вызывать в amxmodx, иначе он не запишет себе эти плагины
 	if (!registerPlugin(pPlugin, error, pluginName))
