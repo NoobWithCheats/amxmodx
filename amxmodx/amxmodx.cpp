@@ -4751,7 +4751,66 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 		return false;
 	}
 	
-	pPlugin.reloadPlugin()
+	char pluginName[256]; // TODO: надо записать, но функция получает только при const char
+	void* code = pPlugin->getCode();
+	ke::SafeSprintf(pluginName, sizeof(pluginName), "%s", pPlugin->getName());
+	// если program (2-й арг) 0, то мы не освободим память, выделянную под плагин. опасно ли это? обновится ли наш плагин после этого?
+
+	if (unload_amxscript(pAmx, &code) != AMX_ERR_NONE); // TODO ссылка в ссылке. выгрузка плаигна с Сервера
+	{
+		AMXXLOG_Error("[AMXX] Plugin \"%s\" could not be unloaded from memory", pluginName);
+		// ошибка, не удалось выгрузить код плагина с памяти, но самого плагина нет
+	}
+	// выгружает плагин из нашего реестра
+	unloadPlugin(pPlugin); //TODO: ссылка в ссылке
+	int debugFlag;
+	int search;
+
+	// проверка, что плагин активен в plugins.ini или других plugins-*.ini
+	if (SearchPluginInFile(get_localinfo("amxx_plugins", "addons/amxmodx/configs/plugins.ini"), pluginName, debugFlag))
+	{
+		search = 1;
+	}
+	else
+	{
+		CStack<ke::AString *> files;
+		const char *configsDir = get_localinfo("amxx_configsdir", "addons/amxmodx/configs");
+		char path[255];
+		BuildPluginFileList(configsDir, files);
+
+		while (!files.empty())
+		{
+			ke::AString *pString = files.front();
+			ke::SafeSprintf(path, sizeof(path), "%s/%s",
+				configsDir,
+				pString->chars());
+
+			if (SearchPluginInFile(path, pluginName, debugFlag))
+			{
+				search = 1;
+				break;
+			}
+
+			delete pString;
+			files.pop();
+		}
+	}
+
+	if (!search)
+	{
+		// Не удлаось найти плагин в plugins
+		return false;
+	}
+
+	char error[256];
+
+	*pPlugin = loadPlugin(get_localinfo("amxx_pluginsdir", "addons/amxmodx/plugins"), pluginName, error, sizeof(error), debugFlag);
+		
+	// ссылка, ссылка (1 и 2 арг). Это уже надо вызывать в amxmodx, иначе он не запишет себе эти плагины
+	if (!registerPlugin(pPlugin, error, pluginName))
+	{
+		return false;
+	}
 
 	return true;
 }

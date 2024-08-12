@@ -103,7 +103,6 @@ public:
 		void AddToFailCounter(unsigned int i);
 		void pausePlugin();
 		void unpausePlugin();
-		bool reloadPlugin();
 		void pauseFunction(int id);
 		void unpauseFunction(int id);
 		void setStatus(int a);
