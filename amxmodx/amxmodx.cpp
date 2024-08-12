@@ -4751,7 +4751,7 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 		return false;
 	}
 	
-	reloadPlugin(pPlugin);
+	g_plugins.reloadPlugin(pPlugin);
 
 	return true;
 }
