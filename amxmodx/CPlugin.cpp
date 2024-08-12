@@ -104,7 +104,11 @@ bool CPluginMngr:: SearchPluginOtherFile(char* pluginName, int debugFlag)
 
 	while (!_findnext(handle, &fd))
 	{
-		ParseAndOrAdd(files, fd.name);
+		if (strncmp(fd.name, "plugins-", 8) == 0)
+		{
+			ke::AString *pString = new ke::AString(fd.name);
+			files.push(pString);
+		}
 	}
 
 	_findclose(handle);
@@ -120,12 +124,19 @@ bool CPluginMngr:: SearchPluginOtherFile(char* pluginName, int debugFlag)
 
 	while ( (ep=readdir(dp)) != NULL )
 	{
-		ParseAndOrAdd(files, ep->d_name);
+		if (strncmp(fd.name, "plugins-", 8) == 0)
+		{
+			size_t len = strlen(name);
+			if (strcmp(&name[len-4], ".ini") == 0)
+			{
+				ke::AString *pString = new ke::AString(fd.name);
+				files.push(pString);
+			}
+		}
 	}
 
 	closedir (dp);
 #endif
-	//BuildPluginFileList(configsDir, files);
 
 	while (!files.empty())
 	{
