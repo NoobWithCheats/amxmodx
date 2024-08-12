@@ -4738,7 +4738,7 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 
 	if (params[arg_id] < 0)
 	{
-		// TOD: сделать так, чтоб мы просто вызывали другой натив для этого
+		// TODO: сделать так, чтоб мы просто вызывали другой натив для этого
 		return false;
 	}
 	
@@ -4747,13 +4747,24 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 
 	if (amx == pAmx)	// мы не можем перезагрузить этот же плагин. Есть специальная функция для этого
 	{
-		// TOD: сделать так, чтоб мы просто вызывали другой натив для этого
+		// TODO: сделать так, чтоб мы просто вызывали другой натив для этого
 		return false;
 	}
 	
-	g_plugins.reloadPlugin(pPlugin);
+	if (g_plugins.reloadPlugin(pPlugin))
+	{
+		// INFO: плагин успешно загружен
+		return true;
+	}
 
-	return true;
+	/**
+	 * // INFO: Плагин не загружен по одной из причин:
+	 * 1) Плагин не активен в plugins.ini или в другом plugins-*.ini
+	 * 2) Плагин не загрузился в память
+	 */ 
+	
+
+	return false;
 }
 
 AMX_NATIVE_INFO amxmodx_Natives[] =

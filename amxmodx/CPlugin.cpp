@@ -69,6 +69,7 @@ bool CPluginMngr::reloadPlugin(CPlugin* a)
 	{
 		if (!SearchPluginOtherFile(pluginName, debugFlag))
 		{
+			// плагин не найден. Проверьте plugins.ini
 			return false;
 		}
 	}
@@ -80,6 +81,7 @@ bool CPluginMngr::reloadPlugin(CPlugin* a)
 	// ссылка, ссылка (1 и 2 арг). Это уже надо вызывать в amxmodx, иначе он не запишет себе эти плагины
 	if (!registerPlugin(pPlugin, error, pluginName))
 	{
+		// INFO: плагин не загрузился
 		return false;
 	}
 
