@@ -135,7 +135,8 @@ public:
 	bool reloadPlugin(CPlugin* a);
 	int loadPluginsFromFile(const char* filename, bool warn=true);
 	int registerPlugin(CPlugin* a, char* error, char* pluginName);
-	int SearchPluginInFile(const char* filename, char* name, int debugFlag);
+	bool SearchPluginInFile(const char* filename, char* name, int debugFlag);
+	bool SearchPluginOtherFile(char* pluginName, int debugFlag);
 	
 	inline CPlugin* findPluginFast(AMX *amx) { return (CPlugin*)(amx->userdata[UD_FINDPLUGIN]); }
 	CPlugin* findPlugin(AMX *amx);

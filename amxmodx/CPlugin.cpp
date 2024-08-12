@@ -63,42 +63,14 @@ bool CPluginMngr::reloadPlugin(CPlugin* a)
 	// выгружает плагин из нашего реестра
 	unloadPlugin(a); //TODO: ссылка в ссылке
 	int debugFlag;
-	int search;
 
 	// проверка, что плагин активен в plugins.ini или других plugins-*.ini
-	if (SearchPluginInFile(get_localinfo("amxx_plugins", "addons/amxmodx/configs/plugins.ini"), pluginName, debugFlag))
+	if (!SearchPluginInFile(get_localinfo("amxx_configsdir", "addons/amxmodx/configs/plugins.ini"), pluginName, debugFlag))
 	{
-		search = 1;
-	}
-	else
-	{
-		CStack<ke::AString *> files;
-		const char *configsDir = get_localinfo("amxx_configsdir", "addons/amxmodx/configs");
-		char path[255];
-		BuildPluginFileList(configsDir, files);
-
-		while (!files.empty())
+		if (!SearchPluginOtherFile(pluginName, debugFlag))
 		{
-			ke::AString *pString = files.front();
-			ke::SafeSprintf(path, sizeof(path), "%s/%s",
-				configsDir,
-				pString->chars());
-
-			if (SearchPluginInFile(path, pluginName, debugFlag))
-			{
-				search = 1;
-				break;
-			}
-
-			delete pString;
-			files.pop();
+			return false;
 		}
-	}
-
-	if (!search)
-	{
-		// Не удлаось найти плагин в plugins
-		return false;
 	}
 
 	char error[256];
@@ -112,6 +84,67 @@ bool CPluginMngr::reloadPlugin(CPlugin* a)
 	}
 
 	return true;
+}
+
+bool CPluginMngr:: SearchPluginOtherFile(char* pluginName, int debugFlag)
+{
+	CStack<ke::AString *> files;
+	const char *configsDir = get_localinfo("amxx_configsdir", "addons/amxmodx/configs");
+	char path[255];
+
+	char path[PLATFORM_MAX_PATH];
+#if defined WIN32
+	build_pathname_r(path, sizeof(path), "%s/*.ini", initialdir);
+	_finddata_t fd;
+	intptr_t handle = _findfirst(path, &fd);
+
+	if (handle < 0)
+	{
+		return false;
+	}
+
+	while (!_findnext(handle, &fd))
+	{
+		ParseAndOrAdd(files, fd.name);
+	}
+
+	_findclose(handle);
+#elif defined(__linux__) || defined(__APPLE__)
+	build_pathname_r(path, sizeof(path), "%s/", initialdir);
+	struct dirent *ep;
+	DIR *dp;
+
+	if ((dp = opendir(path)) == NULL)
+	{
+		return false;
+	}
+
+	while ( (ep=readdir(dp)) != NULL )
+	{
+		ParseAndOrAdd(files, ep->d_name);
+	}
+
+	closedir (dp);
+#endif
+	//BuildPluginFileList(configsDir, files);
+
+	while (!files.empty())
+	{
+		ke::AString *pString = files.front();
+		ke::SafeSprintf(path, sizeof(path), "%s/%s",
+			configsDir,
+			pString->chars());
+
+		if (SearchPluginInFile(path, pluginName, debugFlag))
+		{
+			return true;
+		}
+
+		delete pString;
+		files.pop();
+	}
+
+	return false;
 }
 
 void CPluginMngr::Finalize()
@@ -135,14 +168,14 @@ void CPluginMngr::Finalize()
 	m_Finalized = true;
 }
 
-int CPluginMngr::SearchPluginInFile(const char* filename, char* name, int debugFlag)
+bool CPluginMngr::SearchPluginInFile(const char* filename, char* name, int debugFlag)
 {
 	char file[PLATFORM_MAX_PATH];
 	FILE *fp = fopen(build_pathname_r(file, sizeof(file), "%s", filename), "rt");
 
 	if (!fp)
 	{
-		return 0;
+		return false;
 	}
 
 	char pluginName[256], debug[256], line[512];
@@ -181,10 +214,10 @@ int CPluginMngr::SearchPluginInFile(const char* filename, char* name, int debugF
 			debugFlag = 1;
 		}
 
-		return 1;
+		return true;
 	}
 
-	return 0;
+	return false;
 }
 
 int CPluginMngr::registerPlugin(CPlugin* pPlugin, char* error, char* pluginName)
