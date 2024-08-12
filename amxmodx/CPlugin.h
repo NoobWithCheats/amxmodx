@@ -77,7 +77,7 @@ public:
 		ke::Vector<ke::AutoPtr<AutoConfig>> m_configs;
 	public:
 		inline const char* getName() { return name.chars();}
-		inline void getName(char* n) { n = name; } 
+		inline char* getName() { return name.chars();} 
 		inline const char* getVersion() { return version.chars();}
 		inline const char* getTitle() { return title.chars();}
 		inline const char* getAuthor() { return author.chars();}
