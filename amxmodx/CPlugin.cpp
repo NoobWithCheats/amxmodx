@@ -68,6 +68,124 @@ void CPluginMngr::Finalize()
 	m_Finalized = true;
 }
 
+bool CPluginMngr::SearchPluginInFile(const char* filename, const char* name, int debugFlag)
+{
+	char file[PLATFORM_MAX_PATH];
+	FILE *fp = fopen(build_pathname_r(file, sizeof(file), "%s", filename), "rt");
+
+	if (!fp)
+	{
+		return false;
+	}
+
+	const pluginName[256];
+	char debug[256];
+	char line[512];
+
+	while (!feof(fp))
+	{
+		pluginName[0] = '\0';
+		debug[0] = '\0';
+		line[0] = '\0';
+
+		fgets(line, sizeof(line), fp);
+
+
+		char *ptr = line;
+		while (*ptr)
+		{
+			if (*ptr == ';')
+			{
+				*ptr = '\0';
+			}
+			else 
+			{
+				ptr++;
+			}
+		}
+
+		sscanf(line, "%s %s", pluginName, debug);
+
+		if (!strcmp(pluginName, name))
+		{
+			continue;
+		}
+
+		if (isalnum(*debug) && !strcmp(debug, "debug"))
+		{
+			debugFlag = 1;
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+bool CPluginMngr::registerPlugin(CPlugin* pPlugin)
+{
+	if (pPlugin->getStatusCode() == ps_bad_load)
+	{
+		char errorMsg[255];
+		sprintf(errorMsg, "%s (plugin \"%s\")", error, pluginName);
+		pPlugin->setError(errorMsg);
+		AMXXLOG_Error("[AMXX] %s", pPlugin->getError());
+		return false;
+	}
+	else
+	{
+		cell addr;
+		
+		if (amx_FindPubVar(pPlugin->getAMX(), "MaxClients", &addr) != AMX_ERR_NOTFOUND)
+		{
+			*get_amxaddr(pPlugin->getAMX(), addr) = gpGlobals->maxClients;
+		}
+
+		if (amx_FindPubVar(pPlugin->getAMX(), "MapName", &addr) != AMX_ERR_NOTFOUND)
+		{
+			set_amxstring(pPlugin->getAMX(), addr, STRING(gpGlobals->mapname), MAX_MAPNAME_LENGTH - 1);
+		}
+
+		auto length = 0;
+		if (amx_FindPubVar(pPlugin->getAMX(), "PluginName", &addr) != AMX_ERR_NOTFOUND)
+		{
+			pPlugin->setTitle(get_amxstring(pPlugin->getAMX(), addr, 0, length));
+		}
+
+		if (amx_FindPubVar(pPlugin->getAMX(), "PluginVersion", &addr) != AMX_ERR_NOTFOUND)
+		{
+			pPlugin->setVersion(get_amxstring(pPlugin->getAMX(), addr, 0, length));
+		}
+
+		if (amx_FindPubVar(pPlugin->getAMX(), "PluginAuthor", &addr) != AMX_ERR_NOTFOUND)
+		{
+			pPlugin->setAuthor(get_amxstring(pPlugin->getAMX(), addr, 0, length));
+		}
+
+		if (amx_FindPubVar(pPlugin->getAMX(), "PluginURL", &addr) != AMX_ERR_NOTFOUND)
+		{
+			pPlugin->setUrl(get_amxstring(pPlugin->getAMX(), addr, 0, length));
+		}
+
+		if (amx_FindPubVar(pPlugin->getAMX(), "PluginDescription", &addr) != AMX_ERR_NOTFOUND)
+		{
+			pPlugin->setDescription(get_amxstring(pPlugin->getAMX(), addr, 0, length));
+		}
+
+		if (amx_FindPubVar(pPlugin->getAMX(), "NULL_STRING", &addr) != AMX_ERR_NOTFOUND)
+		{
+			pPlugin->m_pNullStringOfs = get_amxaddr(pPlugin->getAMX(), addr);
+		}
+
+		if (amx_FindPubVar(pPlugin->getAMX(), "NULL_VECTOR", &addr) != AMX_ERR_NOTFOUND)
+		{
+			pPlugin->m_pNullVectorOfs = get_amxaddr(pPlugin->getAMX(), addr);
+		}
+	}
+
+	return true;
+}
+
 int CPluginMngr::loadPluginsFromFile(const char* filename, bool warn)
 {
 	char file[PLATFORM_MAX_PATH];
@@ -148,62 +266,7 @@ int CPluginMngr::loadPluginsFromFile(const char* filename, bool warn)
 
 		CPlugin* plugin = loadPlugin(pluginsDir, pluginName, error, sizeof(error), debugFlag);
 
-		if (plugin->getStatusCode() == ps_bad_load)
-		{
-			char errorMsg[255];
-			sprintf(errorMsg, "%s (plugin \"%s\")", error, pluginName);
-			plugin->setError(errorMsg);
-			AMXXLOG_Error("[AMXX] %s", plugin->getError());
-		}
-		else
-		{
-			cell addr;
-			if (amx_FindPubVar(plugin->getAMX(), "MaxClients", &addr) != AMX_ERR_NOTFOUND)
-			{
-				*get_amxaddr(plugin->getAMX(), addr) = gpGlobals->maxClients;
-			}
-
-			if (amx_FindPubVar(plugin->getAMX(), "MapName", &addr) != AMX_ERR_NOTFOUND)
-			{
-				set_amxstring(plugin->getAMX(), addr, STRING(gpGlobals->mapname), MAX_MAPNAME_LENGTH - 1);
-			}
-
-			auto length = 0;
-			if (amx_FindPubVar(plugin->getAMX(), "PluginName", &addr) != AMX_ERR_NOTFOUND)
-			{
-				plugin->setTitle(get_amxstring(plugin->getAMX(), addr, 0, length));
-			}
-
-			if (amx_FindPubVar(plugin->getAMX(), "PluginVersion", &addr) != AMX_ERR_NOTFOUND)
-			{
-				plugin->setVersion(get_amxstring(plugin->getAMX(), addr, 0, length));
-			}
-
-			if (amx_FindPubVar(plugin->getAMX(), "PluginAuthor", &addr) != AMX_ERR_NOTFOUND)
-			{
-				plugin->setAuthor(get_amxstring(plugin->getAMX(), addr, 0, length));
-			}
-
-			if (amx_FindPubVar(plugin->getAMX(), "PluginURL", &addr) != AMX_ERR_NOTFOUND)
-			{
-				plugin->setUrl(get_amxstring(plugin->getAMX(), addr, 0, length));
-			}
-
-			if (amx_FindPubVar(plugin->getAMX(), "PluginDescription", &addr) != AMX_ERR_NOTFOUND)
-			{
-				plugin->setDescription(get_amxstring(plugin->getAMX(), addr, 0, length));
-			}
-
-			if (amx_FindPubVar(plugin->getAMX(), "NULL_STRING", &addr) != AMX_ERR_NOTFOUND)
-			{
-				plugin->m_pNullStringOfs = get_amxaddr(plugin->getAMX(), addr);
-			}
-
-			if (amx_FindPubVar(plugin->getAMX(), "NULL_VECTOR", &addr) != AMX_ERR_NOTFOUND)
-			{
-				plugin->m_pNullVectorOfs = get_amxaddr(plugin->getAMX(), addr);
-			}
-		}
+		registerPlugin(plugin);
 	}
 
 	fclose(fp);

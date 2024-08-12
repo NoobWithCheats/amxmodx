@@ -4750,8 +4750,7 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 		return false;
 	}
 	
-	const char pluginName[256];
-	strcpy(pluginName, pPlugin->getName());
+	const char* pluginName = pPlugin->getName();
 
 	// если program (2-й арг) 0, то мы не освободим память, выделянную под плагин. опасно ли это? обновится ли наш плагин после этого?
 
@@ -4807,120 +4806,12 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 	*pPlugin = loadPlugin(pluginsDir, pluginName, error, sizeof(error), debugFlag);
 		
 	// ссылка, ссылка (1 и 2 арг). Это уже надо вызывать в amxmodx, иначе он не запишет себе эти плагины
-	if (pPlugin->getStatusCode() == ps_bad_load)
+	if (!registerPlugin(pPlugin))
 	{
-		char errorMsg[255];
-		sprintf(errorMsg, "%s (plugin \"%s\")", error, pluginName);
-		pPlugin->setError(errorMsg);
-		AMXXLOG_Error("[AMXX] %s", pPlugin->getError());
 		return false;
-	}
-	else
-	{
-		cell addr;
-		
-		if (amx_FindPubVar(pPlugin->getAMX(), "MaxClients", &addr) != AMX_ERR_NOTFOUND)
-		{
-			*get_amxaddr(pPlugin->getAMX(), addr) = gpGlobals->maxClients;
-		}
-
-		if (amx_FindPubVar(pPlugin->getAMX(), "MapName", &addr) != AMX_ERR_NOTFOUND)
-		{
-			set_amxstring(pPlugin->getAMX(), addr, STRING(gpGlobals->mapname), MAX_MAPNAME_LENGTH - 1);
-		}
-
-		auto length = 0;
-		if (amx_FindPubVar(pPlugin->getAMX(), "PluginName", &addr) != AMX_ERR_NOTFOUND)
-		{
-			pPlugin->setTitle(get_amxstring(pPlugin->getAMX(), addr, 0, length));
-		}
-
-		if (amx_FindPubVar(pPlugin->getAMX(), "PluginVersion", &addr) != AMX_ERR_NOTFOUND)
-		{
-			pPlugin->setVersion(get_amxstring(pPlugin->getAMX(), addr, 0, length));
-		}
-
-		if (amx_FindPubVar(pPlugin->getAMX(), "PluginAuthor", &addr) != AMX_ERR_NOTFOUND)
-		{
-			pPlugin->setAuthor(get_amxstring(pPlugin->getAMX(), addr, 0, length));
-		}
-
-		if (amx_FindPubVar(pPlugin->getAMX(), "PluginURL", &addr) != AMX_ERR_NOTFOUND)
-		{
-			pPlugin->setUrl(get_amxstring(pPlugin->getAMX(), addr, 0, length));
-		}
-
-		if (amx_FindPubVar(pPlugin->getAMX(), "PluginDescription", &addr) != AMX_ERR_NOTFOUND)
-		{
-			pPlugin->setDescription(get_amxstring(pPlugin->getAMX(), addr, 0, length));
-		}
-
-		if (amx_FindPubVar(pPlugin->getAMX(), "NULL_STRING", &addr) != AMX_ERR_NOTFOUND)
-		{
-			pPlugin->m_pNullStringOfs = get_amxaddr(pPlugin->getAMX(), addr);
-		}
-
-		if (amx_FindPubVar(pPlugin->getAMX(), "NULL_VECTOR", &addr) != AMX_ERR_NOTFOUND)
-		{
-			pPlugin->m_pNullVectorOfs = get_amxaddr(pPlugin->getAMX(), addr);
-		}
 	}
 
 	return true;
-}
-
-
-bool SearchPluginInFile(const char* filename, const char name, int debugFlag)
-{
-	char file[PLATFORM_MAX_PATH];
-	FILE *fp = fopen(build_pathname_r(file, sizeof(file), "%s", filename), "rt");
-
-	if (!fp)
-	{
-		return false;
-	}
-
-	char pluginName[256], debug[256];
-	char line[512];
-
-	while (!feof(fp))
-	{
-		pluginName[0] = '\0';
-		debug[0] = '\0';
-		line[0] = '\0';
-
-		fgets(line, sizeof(line), fp);
-
-
-		char *ptr = line;
-		while (*ptr)
-		{
-			if (*ptr == ';')
-			{
-				*ptr = '\0';
-			}
-			else 
-			{
-				ptr++;
-			}
-		}
-
-		sscanf(line, "%s %s", pluginName, debug);
-
-		if (!strcmp(pluginName, name))
-		{
-			continue;
-		}
-
-		if (isalnum(*debug) && !strcmp(debug, "debug"))
-		{
-			debugFlag = 1;
-		}
-
-		return true;
-	}
-
-	return false;
 }
 
 AMX_NATIVE_INFO amxmodx_Natives[] =
