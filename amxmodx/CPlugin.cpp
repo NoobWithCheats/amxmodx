@@ -337,7 +337,7 @@ CPluginMngr::CPlugin* CPluginMngr::findPlugin(const char* name)
 bool CPluginMngr::CPlugin::reloadPlugin()
 {
 	char pluginName[256]; // TODO: надо записать, но функция получает только при const char
-	ke::SafeSprintf(pluginName, sizeof(pluginName), "%s", pPlugin->getName());
+	ke::SafeSprintf(pluginName, sizeof(pluginName), "%s", a->getName());
 	// если program (2-й арг) 0, то мы не освободим память, выделянную под плагин. опасно ли это? обновится ли наш плагин после этого?
 
 	if (unload_amxscript(&amx, &code) != AMX_ERR_NONE); // TODO ссылка в ссылке. выгрузка плаигна с Сервера
@@ -346,7 +346,7 @@ bool CPluginMngr::CPlugin::reloadPlugin()
 		// ошибка, не удалось выгрузить код плагина с памяти, но самого плагина нет
 	}
 	// выгружает плагин из нашего реестра
-	unloadPlugin(&amx); //TODO: ссылка в ссылке
+	unloadPlugin(a); //TODO: ссылка в ссылке
 	int debugFlag;
 	int search;
 
