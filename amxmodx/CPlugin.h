@@ -132,6 +132,7 @@ public:
 	CPlugin* loadPlugin(const char* path, const char* name, char* error, size_t maxLength, int debug);
 	void unloadPlugin(CPlugin** a);
 	void unloadPlugin(CPlugin* a);
+	bool reloadPlugin(CPlugin* a);
 	int loadPluginsFromFile(const char* filename, bool warn=true);
 	int registerPlugin(CPlugin* a, char* error, char* pluginName);
 	int SearchPluginInFile(const char* filename, char* name, int debugFlag);
