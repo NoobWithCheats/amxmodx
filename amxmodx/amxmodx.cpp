@@ -4807,7 +4807,7 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 	*pPlugin = loadPlugin(pluginsDir, pluginName, error, sizeof(error), debugFlag);
 		
 	// ссылка, ссылка (1 и 2 арг). Это уже надо вызывать в amxmodx, иначе он не запишет себе эти плагины
-	if (!registerPlugin(pPlugin))
+	if (!registerPlugin(pPlugin, error, pluginName))
 	{
 		return false;
 	}
