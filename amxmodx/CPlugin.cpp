@@ -16,7 +16,7 @@
 #include "libraries.h"
 #include <amxmodx_version.h>
 #include "engine_strucs.h"
-
+#include "meta_api.h"
 extern const char *no_function;
 
 CPluginMngr::CPlugin* CPluginMngr::loadPlugin(const char* path, const char* name, char* error, size_t maxLength, int debug)
@@ -55,7 +55,7 @@ bool CPluginMngr::reloadPlugin(CPlugin* a)
 	ke::SafeSprintf(pluginName, sizeof(pluginName), "%s", a->getName());
 	// если program (2-й арг) 0, то мы не освободим память, выделянную под плагин. опасно ли это? обновится ли наш плагин после этого?
 
-	if (unload_amxscript(amx, code) != AMX_ERR_NONE); // TODO ссылка в ссылке. выгрузка плаигна с Сервера
+	if (unload_amxscript(amx, &code) != AMX_ERR_NONE); // TODO ссылка в ссылке. выгрузка плаигна с Сервера
 	{
 		AMXXLOG_Error("[AMXX] Plugin \"%s\" could not be unloaded from memory", pluginName);
 		// ошибка, не удалось выгрузить код плагина с памяти, но самого плагина нет
