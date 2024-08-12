@@ -78,9 +78,7 @@ int CPluginMngr::SearchPluginInFile(const char* filename, char* name, int debugF
 		return 0;
 	}
 
-	const pluginName[256];
-	char debug[256];
-	char line[512];
+	char pluginName[256], debug[256], line[512];
 
 	while (!feof(fp))
 	{
