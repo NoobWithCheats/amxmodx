@@ -4762,7 +4762,7 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 		// ошибка, не удалось выгрузить код плагина с памяти, но самого плагина нет
 	}
 	// выгружает плагин из нашего реестра
-	unloadPlugin(pPlugin); //TODO: ссылка в ссылке
+	CPluginMngr::unloadPlugin(pPlugin); //TODO: ссылка в ссылке
 	int debugFlag;
 	int search;
 
@@ -4785,7 +4785,7 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 				configsDir,
 				pString->chars());
 
-			if (SearchPluginInFile(path, pluginName, debugFlag))
+			if (CPluginMngr::SearchPluginInFile(path, pluginName, debugFlag))
 			{
 				search = 1;
 				break;
@@ -4804,10 +4804,10 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 
 	char error[256];
 
-	*pPlugin = loadPlugin(get_localinfo("amxx_pluginsdir", "addons/amxmodx/plugins"), pluginName, error, sizeof(error), debugFlag);
+	*pPlugin = CPluginMngr::loadPlugin(get_localinfo("amxx_pluginsdir", "addons/amxmodx/plugins"), pluginName, error, sizeof(error), debugFlag);
 		
 	// ссылка, ссылка (1 и 2 арг). Это уже надо вызывать в amxmodx, иначе он не запишет себе эти плагины
-	if (!registerPlugin(pPlugin, error, pluginName))
+	if (!CPluginMngr::registerPlugin(pPlugin, error, pluginName))
 	{
 		return false;
 	}
