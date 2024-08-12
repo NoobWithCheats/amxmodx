@@ -4754,6 +4754,7 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 	char pluginName[256]; // TODO: надо записать, но функция получает только при const char
 	void* code = pPlugin->getCode();
 	ke::SafeSprintf(pluginName, sizeof(pluginName), "%s", pPlugin->getName());
+	CPluginMngr plugins;
 	// если program (2-й арг) 0, то мы не освободим память, выделянную под плагин. опасно ли это? обновится ли наш плагин после этого?
 
 	if (unload_amxscript(pAmx, &code) != AMX_ERR_NONE); // TODO ссылка в ссылке. выгрузка плаигна с Сервера
@@ -4762,12 +4763,12 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 		// ошибка, не удалось выгрузить код плагина с памяти, но самого плагина нет
 	}
 	// выгружает плагин из нашего реестра
-	CPluginMngr::unloadPlugin(pPlugin); //TODO: ссылка в ссылке
+	plugins.unloadPlugin(pPlugin); //TODO: ссылка в ссылке
 	int debugFlag;
 	int search;
 
 	// проверка, что плагин активен в plugins.ini или других plugins-*.ini
-	if (SearchPluginInFile(get_localinfo("amxx_plugins", "addons/amxmodx/configs/plugins.ini"), pluginName, debugFlag))
+	if (plugins.SearchPluginInFile(get_localinfo("amxx_plugins", "addons/amxmodx/configs/plugins.ini"), pluginName, debugFlag))
 	{
 		search = 1;
 	}
@@ -4785,7 +4786,7 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 				configsDir,
 				pString->chars());
 
-			if (CPluginMngr::SearchPluginInFile(path, pluginName, debugFlag))
+			if (plugins.SearchPluginInFile(path, pluginName, debugFlag))
 			{
 				search = 1;
 				break;
@@ -4804,10 +4805,10 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 
 	char error[256];
 
-	*pPlugin = CPluginMngr::loadPlugin(get_localinfo("amxx_pluginsdir", "addons/amxmodx/plugins"), pluginName, error, sizeof(error), debugFlag);
+	*pPlugin = plugins.loadPlugin(get_localinfo("amxx_pluginsdir", "addons/amxmodx/plugins"), pluginName, error, sizeof(error), debugFlag);
 		
 	// ссылка, ссылка (1 и 2 арг). Это уже надо вызывать в amxmodx, иначе он не запишет себе эти плагины
-	if (!CPluginMngr::registerPlugin(pPlugin, error, pluginName))
+	if (!plugins.registerPlugin(pPlugin, error, pluginName))
 	{
 		return false;
 	}
