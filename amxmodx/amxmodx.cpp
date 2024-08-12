@@ -4752,7 +4752,7 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 	
 	char pluginName[256]; // TODO: надо записать, но функция получает только при const char
 	void* code = pPlugin->getCode();
-	pluginName = pPlugin->getName();
+	ke::SafeSprintf(pluginName, sizeof(pluginName), "%s", pPlugin->getName());
 	// если program (2-й арг) 0, то мы не освободим память, выделянную под плагин. опасно ли это? обновится ли наш плагин после этого?
 
 	if (unload_amxscript(pAmx, &code) != AMX_ERR_NONE); // TODO ссылка в ссылке. выгрузка плаигна с Сервера
