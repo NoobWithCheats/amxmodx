@@ -92,9 +92,8 @@ bool CPluginMngr:: SearchPluginOtherFile(char* pluginName, int debugFlag)
 	const char *configsDir = get_localinfo("amxx_configsdir", "addons/amxmodx/configs");
 	char path[255];
 
-	char path[PLATFORM_MAX_PATH];
 #if defined WIN32
-	build_pathname_r(path, sizeof(path), "%s/*.ini", initialdir);
+	build_pathname_r(path, sizeof(path), "%s/*.ini", configsDir);
 	_finddata_t fd;
 	intptr_t handle = _findfirst(path, &fd);
 
@@ -110,7 +109,7 @@ bool CPluginMngr:: SearchPluginOtherFile(char* pluginName, int debugFlag)
 
 	_findclose(handle);
 #elif defined(__linux__) || defined(__APPLE__)
-	build_pathname_r(path, sizeof(path), "%s/", initialdir);
+	build_pathname_r(path, sizeof(path), "%s/", configsDir);
 	struct dirent *ep;
 	DIR *dp;
 
