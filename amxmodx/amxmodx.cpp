@@ -4750,17 +4750,18 @@ static cell AMX_NATIVE_CALL reload_plugin_id(AMX *amx, cell *params)
 		return false;
 	}
 	
-	const char* pluginName = pPlugin->getName();
-
+	char pluginName[256]; // TODO: надо записать, но функция получает только при const char
+	void* code = pPlugin->getCode();
+	pPlugin->getName(pluginName);
 	// если program (2-й арг) 0, то мы не освободим память, выделянную под плагин. опасно ли это? обновится ли наш плагин после этого?
 
-	if (unload_amxscript(pAmx, pPlugin->getCode()) != AMX_ERR_NONE); // выгрузка плаигна с Сервера
+	if (unload_amxscript(pAmx, code) != AMX_ERR_NONE); // TODO ссылка в ссылке. выгрузка плаигна с Сервера
 	{
 		AMXXLOG_Error("[AMXX] Plugin \"%s\" could not be unloaded from memory", pluginName);
 		// ошибка, не удалось выгрузить код плагина с памяти, но самого плагина нет
 	}
-
-	unloadPlugin(pPlugin); // выгружает плагин из нашего реестра
+	// выгружает плагин из нашего реестра
+	unloadPlugin(pPlugin); //TODO: ссылка в ссылке
 	int debugFlag;
 	int search;
 

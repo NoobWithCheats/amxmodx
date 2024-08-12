@@ -68,14 +68,14 @@ void CPluginMngr::Finalize()
 	m_Finalized = true;
 }
 
-bool CPluginMngr::SearchPluginInFile(const char* filename, const char* name, int debugFlag)
+int CPluginMngr::SearchPluginInFile(const char* filename, char* name, int debugFlag)
 {
 	char file[PLATFORM_MAX_PATH];
 	FILE *fp = fopen(build_pathname_r(file, sizeof(file), "%s", filename), "rt");
 
 	if (!fp)
 	{
-		return false;
+		return 0;
 	}
 
 	const pluginName[256];
@@ -116,13 +116,13 @@ bool CPluginMngr::SearchPluginInFile(const char* filename, const char* name, int
 			debugFlag = 1;
 		}
 
-		return true;
+		return 1;
 	}
 
-	return false;
+	return 0;
 }
 
-bool CPluginMngr::registerPlugin(CPlugin* pPlugin)
+int CPluginMngr::registerPlugin(CPlugin* pPlugin, char* error, char* pluginName)
 {
 	if (pPlugin->getStatusCode() == ps_bad_load)
 	{
@@ -130,7 +130,7 @@ bool CPluginMngr::registerPlugin(CPlugin* pPlugin)
 		sprintf(errorMsg, "%s (plugin \"%s\")", error, pluginName);
 		pPlugin->setError(errorMsg);
 		AMXXLOG_Error("[AMXX] %s", pPlugin->getError());
-		return false;
+		return 0;
 	}
 	else
 	{
@@ -183,7 +183,7 @@ bool CPluginMngr::registerPlugin(CPlugin* pPlugin)
 		}
 	}
 
-	return true;
+	return 1;
 }
 
 int CPluginMngr::loadPluginsFromFile(const char* filename, bool warn)
@@ -266,7 +266,7 @@ int CPluginMngr::loadPluginsFromFile(const char* filename, bool warn)
 
 		CPlugin* plugin = loadPlugin(pluginsDir, pluginName, error, sizeof(error), debugFlag);
 
-		registerPlugin(plugin);
+		registerPlugin(plugin, error, pluginName);
 	}
 
 	fclose(fp);
